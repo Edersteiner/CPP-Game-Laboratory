@@ -18,7 +18,7 @@ namespace bs {
 
     Cell Board::GetCell(Coord c) const
     {
-        if (!InBounds(c)) return Cell::Empty; // BUG: out-of-bounds looks like Empty (hides mistakes)
+        if (!InBounds(c)) return Cell::Invalid;
         return m_grid[static_cast<std::size_t>(Index(c))];
     }
 
