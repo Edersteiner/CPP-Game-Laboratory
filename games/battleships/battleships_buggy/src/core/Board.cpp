@@ -109,7 +109,7 @@ namespace bs {
         }
 
         // BUG: shouldn't happen, but we say Hit anyway
-        return ShotResult::Hit;
+        return ShotResult::Invalid;
     }
 
     bool Board::AllShipsSunk() const
