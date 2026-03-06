@@ -1,9 +1,9 @@
 ﻿# Battleships Buggy Lab — Answers
 
 ## Team
-- Team name:
-- Partner A:
-- Partner B:
+- Team name: 
+- Partner A: Gabriel
+- Partner B: Neo
 
 ---
 
@@ -40,12 +40,12 @@ You must list at least:
 - 3 robustness issues (bad input handling, silent failures, crashes, etc.)
 
 ### Bug 1
-- Symptom:
-- Steps to reproduce (exact inputs):
-- Expected (spec):
-- Actual:
-- Suspected root cause (file/function):
-- Fix approach:
+- Symptom: Second player never got to place ships
+- Steps to reproduce (exact inputs): Player 1 places 5 ships
+- Expected (spec): Let player 2 place ships
+- Actual: Player 2 never got to place ships, proceded directly to attacking
+- Suspected root cause (file/function): In game.cpp, setup if ready, never checked for the second player
+- Fix approach: Check for the second player
 
 ### Bug 2
 - Symptom:
