@@ -1,5 +1,7 @@
 #include "core/Board.h"
 
+#include <iostream>
+
 namespace bs {
 
     Board::Board(int width, int height)
@@ -22,41 +24,40 @@ namespace bs {
 
     void Board::SetCell(Coord c, Cell v)
     {
-        if (!InBounds(c)) return; // BUG: silently ignore out-of-bounds
+        if (!InBounds(c)) {
+			std::cerr << "Warning: SetCell out of bounds at (" << c.x << "," << c.y << ")\n";
+            return;
+        }
         m_grid[static_cast<std::size_t>(Index(c))] = v;
     }
 
-    bool Board::CanPlaceShip(const Ship& ship) const
+    PlaceResult Board::CanPlaceShip(const Ship& ship) const
     {
-        // Intentionally buggy overlap check for Vertical ships:
-        // - For vertical ships, we forget to check the last segment for overlap.
         for (int i = 0; i < ship.length; ++i)
         {
             Coord c = ship.start;
             if (ship.orientation == Orientation::Horizontal) c.x += i;
             else c.y += i;
 
-            if (!InBounds(c)) return false;
+            if (!InBounds(c)) return PlaceResult::OutOfBounds;
 
-            if (ship.orientation == Orientation::Vertical && i == ship.length - 1)
+            if (ship.orientation == Orientation::Vertical && i == ship.length)
             {
-                continue; // BUG: last segment not checked for overlap
+                continue;
             }
 
-            if (GetCell(c) != Cell::Empty) return false;
+            if (GetCell(c) != Cell::Empty) return PlaceResult::Overlap;
         }
-        return true;
+        return PlaceResult::Ok;
     }
 
     PlaceResult Board::PlaceShip(const Ship& ship)
     {
         if (ship.length <= 0) return PlaceResult::Invalid;
 
-        if (!CanPlaceShip(ship))
-        {
-            // BUG: cannot distinguish between overlap and out-of-bounds accurately
-            return PlaceResult::Overlap;
-        }
+		PlaceResult r = CanPlaceShip(ship);
+
+		if (r != PlaceResult::Ok) return r;
 
         m_ships.push_back(ship);
 

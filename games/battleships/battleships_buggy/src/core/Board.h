@@ -48,7 +48,7 @@ namespace bs {
         std::vector<Cell> m_grid;
         std::vector<Ship> m_ships;
 
-        bool CanPlaceShip(const Ship& ship) const;
+        PlaceResult CanPlaceShip(const Ship& ship) const;
     };
 
 } // namespace bs

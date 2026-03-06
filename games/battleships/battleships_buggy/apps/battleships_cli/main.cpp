@@ -57,7 +57,7 @@ int main()
                 std::cout << "All ships placed for " << player.name << ". Press Enter to continue...\n";
                 std::string tmp; std::getline(std::cin, tmp);
 
-                game.FinishSetupIfReady(); // BUG: may start Playing too early (before both players finished)
+                game.FinishSetupIfReady();
                 game.NextPlayerDuringSetup();
                 continue;
             }
@@ -83,8 +83,15 @@ int main()
             PlaceResult pr = game.PlaceShipForCurrent(Ship{ length, start, o });
             if (pr != PlaceResult::Ok)
             {
-                // BUG: not informative (spec asks to distinguish OutOfBounds vs Overlap).
-                std::cout << "Could not place ship. (buggy message, no detail)\n";
+                switch (pr) {
+                    case PlaceResult::OutOfBounds:
+                        std::cout << "Ship placement is out of bounds.\n";
+					    break;
+                    case PlaceResult::Overlap:
+						std::cout << "Ship placement overlaps with existing ship.\n";
+                        break;
+                }
+
                 std::cout << "Press Enter...\n";
                 std::getline(std::cin, line);
             }
