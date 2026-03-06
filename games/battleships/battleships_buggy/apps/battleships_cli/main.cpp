@@ -3,6 +3,7 @@
 #include "cli/Input.h"
 #include <iostream>
 #include <string>
+#include <tuple>
 
 using namespace bs;
 
@@ -18,13 +19,17 @@ static void PrintHelp()
         "    or just: A5\n\n";
 }
 
-static Orientation AskOrientation()
+std::tuple<bool, Orientation> AskOrientation()
 {
     std::cout << "Orientation (h/v): ";
     std::string s;
     std::getline(std::cin, s);
-    if (!s.empty() && (s[0] == 'v' || s[0] == 'V')) return Orientation::Vertical;
-    return Orientation::Horizontal;
+
+	if (s.empty()) return std::tuple<bool, Orientation>{ false, Orientation::Horizontal };
+	if (s == "h" || s == "H") return std::tuple<bool, Orientation>{ true, Orientation::Horizontal };
+    if (s == "v" || s == "V") return std::tuple<bool, Orientation>{ true, Orientation::Vertical };
+    std::cout << "Invalid orientation. Defaulting to horizontal.\n";
+	return std::tuple<bool, Orientation>{ false, Orientation::Horizontal };
 }
 
 int main()
@@ -77,10 +82,25 @@ int main()
                 continue;
             }
 
-            Coord start = (cmd.type == CommandType::Shoot) ? cmd.shootTarget : ParseCoordLoose(line);
-            Orientation o = AskOrientation();
+			std::tuple<bool, Coord> parseCoordResult = ParseCoordLoose(line);
 
-            PlaceResult pr = game.PlaceShipForCurrent(Ship{ length, start, o });
+            if (!std::get<0>(parseCoordResult))
+            {
+                std::cout << "Invalid coordinate. Press Enter to try again...\n";
+                std::getline(std::cin, line);
+                continue;
+			}
+
+            std::tuple<bool, Orientation> parseOrientationResult = AskOrientation();
+
+			if (!std::get<0>(parseOrientationResult))
+            {
+                std::cout << "Invalid orientation. Press Enter to try again...\n";
+				std::getline(std::cin, line);
+                continue;
+            }
+
+            PlaceResult pr = game.PlaceShipForCurrent(Ship{ length, std::get<1>(parseCoordResult), std::get<1>(parseOrientationResult)});
             if (pr != PlaceResult::Ok)
             {
                 switch (pr) {

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+#include <tuple>
 
 namespace bs {
 
@@ -13,14 +14,10 @@ namespace bs {
         return s;
     }
 
-    Coord ParseCoordLoose(const std::string& text)
+    std::tuple<bool, Coord> ParseCoordLoose(const std::string& text)
     {
-        // Intentionally loose + slightly buggy parsing:
-        // - if no digits, y becomes 0
-        // - if no letters, x becomes 0
-        // - negative values can slip through if user writes "-1" (bug)
         std::string s = StripSpaces(text);
-        if (s.empty()) return { 0,0 };
+		if (s.empty()) return std::tuple<bool, Coord>{ false, { -1,-1 } };
 
         int x = 0;
         int y = 0;
@@ -39,11 +36,10 @@ namespace bs {
             }
         }
 
-        // Collect digits (and possibly leading '-')
         std::string digits;
         for (char ch : s)
         {
-            if (std::isdigit(static_cast<unsigned char>(ch)) || ch == '-') // BUG: '-' allowed anywhere
+            if (std::isdigit(static_cast<unsigned char>(ch))) 
                 digits.push_back(ch);
         }
 
@@ -56,12 +52,12 @@ namespace bs {
             }
             catch (...)
             {
-                y = 0; // BUG: swallows errors
+				std::tuple<bool, Coord> parseResult{ false, { -1,-1 } };
             }
         }
 
-        if (!hasLetter && !hasDigit) return { 0,0 };
-        return { x, y };
+        if (!hasLetter || !hasDigit) return std::tuple<bool, Coord>{ false, { -1,-1 } };
+        return std::tuple<bool, Coord>{ true, { x, y } };
     }
 
     std::string ToHumanCoord(Coord c)
