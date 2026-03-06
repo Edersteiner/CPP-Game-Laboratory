@@ -15,6 +15,12 @@ Requirement (from specification.md) | Pass/Fail/Unsure | Code location (file + c
 ---|---|---|---
 Example: Turns alternate after each valid shot |  | `battleships_buggy/src/core/Game.cpp` → `Game::AdvanceTurn` | flips current player index
 Example: Tracking board records shots |  | `battleships_buggy/src/core/Game.cpp` → `Game::ShootAtOpponent` | updates `Player::tracking`
+Placement must be validated |  | `` → `` |
+After player 1 places, player 2 must take hot-seat |  | `` → `` |
+Playing phase starts only when both players have placed |  | `` → `` |
+Game reports shot results |  | `` → `` |
+Turns alternate until one player has sunk all opponent ships |  | `` → `` |
+Template |  | `` → `` |
 
 Add rows for all major requirements you verify.
 
@@ -39,7 +45,7 @@ You must list at least:
 - 3 functional bugs (incorrect behavior vs spec)
 - 3 robustness issues (bad input handling, silent failures, crashes, etc.)
 
-### Bug 1
+### Bug 1 functional
 - Symptom: Second player never got to place ships
 - Steps to reproduce (exact inputs): Player 1 places 5 ships
 - Expected (spec): Let player 2 place ships
@@ -47,29 +53,29 @@ You must list at least:
 - Suspected root cause (file/function): In game.cpp, setup if ready, never checked for the second player
 - Fix approach: Check for the second player
 
-### Bug 2
-- Symptom:
-- Steps to reproduce (exact inputs):
-- Expected (spec):
-- Actual:
-- Suspected root cause (file/function):
-- Fix approach:
+### Bug 2 robustness
+- Symptom: Could place vertical ships with their last segment in another
+- Steps to reproduce (exact inputs): Place a ship with its last segment winding up in another
+- Expected (spec): Not allowed to place
+- Actual: Were allowed to place, ships overlapped
+- Suspected root cause (file/function): board.cpp CanPlaceShip() had - 1 on ship length, line 41
+- Fix approach: Remove - 1, line 41
 
-### Bug 3
-- Symptom:
-- Steps to reproduce (exact inputs):
-- Expected (spec):
-- Actual:
-- Suspected root cause (file/function):
-- Fix approach:
+### Bug 3 robustness
+- Symptom: When shooting out of bounds, you still get a hit
+- Steps to reproduce (exact inputs): Type shoot and any coordinate that is out of bounds
+- Expected (spec): Get a sort of failiure to attack confirmation
+- Actual: Get a hit instead
+- Suspected root cause (file/function): Board.cpp, Line 112, we have Hit as our return if we fail to fire, and in enums we don't have a failiure enum in ShotResult
+- Fix approach: Add Invalid to ShotResult, then return Invalid if we fail to fire, then let the player try again
 
-### Bug 4
-- Symptom:
-- Steps to reproduce (exact inputs):
-- Expected (spec):
-- Actual:
-- Suspected root cause (file/function):
-- Fix approach:
+### Bug 4 robustness
+- Symptom: When placing a ship, entering anything but v or V, including nothing, defaults to horizontal
+- Steps to reproduce (exact inputs): Enter anything but v or V
+- Expected (spec): Give an invalid input warning, and make them type either v or h again
+- Actual: Just defaults to horizontal if it is not v or V as an input
+- Suspected root cause (file/function): Line 26, only checking if input is not empty and if there is a v or V
+- Fix approach: Rewrite function to check for specifically v or h, either capitalized or uncapitalized
 
 ### Bug 5
 - Symptom:
@@ -96,14 +102,14 @@ You must list at least:
 A “smell” is not necessarily a bug, but a design/implementation choice that increases risk or cost.
 
 ### Smell 1
-- What (where in code):
-- Why risky:
-- Better approach (short plan):
+- What (where in code): Line 87, main.cpp, very unclear why a ship couldn't be placed
+- Why risky: Confusing player on why a ship could not be placed at set position and orientation
+- Better approach (short plan): Give more verbose feedback on why ship placement failed, instead of a bool we give a PlaceResult
 
 ### Smell 2
-- What (where in code):
-- Why risky:
-- Better approach (short plan):
+- What (where in code): 
+- Why risky: 
+- Better approach (short plan): 
 
 ### Smell 3
 - What (where in code):
